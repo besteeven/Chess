@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Fond blanc -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white"/>
+        </shape>
+    </item>
+
+    <!-- Barre verte en bas -->
+    <item android:gravity="bottom"
+        android:left="10dp"
+        android:right="10dp"
+        android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <size android:height="10dp"/> <!-- hauteur de la barre -->
+            <solid android:color="@color/green" /> <!-- ta couleur verte -->
+        </shape>
+    </item>
+
+</layer-list>

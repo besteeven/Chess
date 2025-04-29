@@ -2,4 +2,7 @@
     <string name="app_name">Jeux d\'échecs</string>
     <string name="signup">Inscription</string>
     <string name="login">Connexion</string>
+    <string name="username">NOM D\'UTILISATEUR</string>"
+    <string name="password">MOT DE PASSE</string>
+    <string name="email">EMAIL</string>
 </resources>
