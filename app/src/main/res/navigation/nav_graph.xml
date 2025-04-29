@@ -2,4 +2,18 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph" />
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/connexionFragment">
+    <fragment
+        android:id="@+id/connexionFragment"
+        android:name="project.chess.connexion.ConnexionFragment"
+        android:label="ConnexionFragment" />
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="project.chess.connexion.SignInFragment"
+        android:label="SignInFragment" />
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="project.chess.connexion.SignUpFragment"
+        android:label="SignUpFragment" />
+</navigation>
