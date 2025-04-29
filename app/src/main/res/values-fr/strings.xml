@@ -5,4 +5,17 @@
     <string name="username">NOM D\'UTILISATEUR</string>"
     <string name="password">MOT DE PASSE</string>
     <string name="email">EMAIL</string>
+    <string name="language">Langue 🇫🇷</string>
+    <string name="logout">Se déconnecter</string>
+    <string name="change_password">Changer le mot de passe</string>
+    <string name="playerName">Nom de joueur</string>"
+    <string name="local_game">Locale</string>
+    <string name="online_game">En ligne</string>
+    <string name="async_game">Partie /nasynchrone</string>
+    <string name="friendly_game">Amicale</string>
+    <string name="home">Accueil</string>
+    <string name="history">Historique</string>
+    <string name="profile">Profil</string>
+    <string name="ranking">Classement</string>
+    <string name="settings">Paramètres</string>
 </resources>

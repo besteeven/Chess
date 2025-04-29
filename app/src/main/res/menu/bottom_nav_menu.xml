@@ -3,27 +3,27 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/home"
-        android:title="Home"
+        android:title="@string/home"
         android:color="@android:color/white"
         />
     <item
         android:id="@+id/navigation_history"
         android:icon="@drawable/historic"
-        android:title="Historic"
+        android:title="@string/history"
         android:color="@android:color/white"
         />
     <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/profil"
-        android:title="Profile"
+        android:title="@string/profile"
         android:color="@android:color/white"
         />
     <item
         android:id="@+id/navigation_ranking"
         android:icon="@drawable/classement"
-        android:title="Classement" />
+        android:title="@string/ranking" />
     <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/logo"
-        android:title="parametres" />
+        android:title="@string/settings" />
 </menu>
