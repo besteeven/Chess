@@ -1,4 +1,4 @@
-package project.chess.connexion
+package project.chess.old
 
 import android.os.Bundle
 import android.util.Log
@@ -14,12 +14,12 @@ class ConnexionFragment:Fragment(R.layout.fragment_home) {
 
         view.findViewById<Button>(R.id.home_signup_button).setOnClickListener {
             Log.d("TEST", "Signup Clicked")
-            findNavController().navigate(R.id.signUpFragment)
+            findNavController().navigate(R.id.action_connexionFragment_to_signUpFragment)
         }
 
         view.findViewById<Button>(R.id.home_login_button).setOnClickListener {
             Log.d("TEST", "Login clicked")
-            findNavController().navigate(R.id.signInFragment)
+            findNavController().navigate(R.id.action_connexionFragment_to_signInFragment)
         }
     }
 }

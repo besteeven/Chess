@@ -1,19 +1,19 @@
 package project.chess
 
 import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import project.chess.entities.Plateau
-import project.chess.gamepkg.ChessBoardUI
+import androidx.activity.compose.setContent
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.Text
 
-class LaunchActivity : AppCompatActivity() {
+
+
+class LaunchActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
 
@@ -24,8 +24,9 @@ class LaunchActivity : AppCompatActivity() {
         //Force la connexion
         auth.signOut()
 
-        setContentView(R.layout.activity_main)
-
-
+        setContent {
+            ChessApp()
+        }
     }
+
 }

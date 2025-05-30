@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/logo"
-    tools:context=".MainActivity">
+    tools:context=".old.MainActivity">
 
     <!-- Layout spécial pour encadrer les EditText -->
 
