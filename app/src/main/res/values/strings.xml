@@ -20,4 +20,6 @@
     <string name="profile">Profile</string>
     <string name="ranking">Ranking</string>
     <string name="settings">Settings</string>
+    <string name="elo" translatable="false">Elo</string>
+    <string name="edit_profile">Change profile</string>
 </resources>

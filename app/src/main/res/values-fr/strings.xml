@@ -18,4 +18,5 @@
     <string name="profile">Profil</string>
     <string name="ranking">Classement</string>
     <string name="settings">Paramètres</string>
+    <string name="edit_profile">Modifier le profil</string>
 </resources>
