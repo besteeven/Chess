@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import project.chess.R
+import project.chess.core.navigation.FriendRoutes
 import project.chess.core.navigation.OnlineRoutes
 import project.chess.core.theme.Theme
 import project.chess.gamepkg.LocalGameActivity
@@ -76,17 +77,19 @@ fun HomeScreen(navController: NavController = rememberNavController()) {
             backgroundColor = MaterialTheme.colorScheme.secondary,
             textSize = 50.sp,
             pngSize = 70.dp,
-            modifier = buttonModifier
+            modifier = buttonModifier,
+            enabled = false
         )
 
         MenuButton(
             text = stringResource(R.string.friendly_game),
-            onClick = {},
+            onClick = {navController.navigate(FriendRoutes.FriendSearch)},
             iconPainter = painterResource(id = R.drawable.friendly),
             backgroundColor = MaterialTheme.colorScheme.secondary,
             textSize = 50.sp,
             pngSize = 70.dp,
-            modifier = buttonModifier
+            modifier = buttonModifier,
+            enabled = false
         )
     }
 }

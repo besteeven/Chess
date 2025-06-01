@@ -40,10 +40,12 @@ fun MenuButton(
     iconVector: ImageVector? = null,      // ← icône vectorielle (optionnelle)
     iconPainter: Painter? = null,         // ← icône PNG (optionnelle)
     pngSize: Dp = 24.dp,
-    imageRes: Int? = null                 // ← image à droite (optionnelle)
+    imageRes: Int? = null,                 // ← image à droite (optionnelle)
+    enabled: Boolean = true
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
             contentColor = contentColor

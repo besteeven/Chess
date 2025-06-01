@@ -51,7 +51,7 @@ fun SearchingMatchScreen(
     ) {
         if (isSearching) {
             CircularProgressIndicator()
-            Text("Recherche d'un adversaire...")
+            Text(stringResource(R.string.searchMatch))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -59,10 +59,10 @@ fun SearchingMatchScreen(
                 viewModel.cancelSearch()
                 navController.popBackStack()
             }) {
-                Text("Annuler")
+                Text(stringResource(R.string.cancel))
             }
         } else if (matchFound != null) {
-            Text("Adversaire trouvé : ${matchFound}")
+            Text(stringResource(R.string.foundOpponent))
         }
     }
 }

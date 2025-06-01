@@ -88,4 +88,6 @@ dependencies {
 
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+    implementation("com.google.firebase:firebase-messaging:24.0.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 }

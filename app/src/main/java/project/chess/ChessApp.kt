@@ -9,7 +9,10 @@ import project.chess.core.theme.Theme
 
 
 @Composable
-fun ChessApp(modifier: Modifier = Modifier) {
+fun ChessApp(
+    modifier: Modifier = Modifier,
+    initialGameId: String? = null,
+    isChallenge: Boolean = false) {
     Theme {
         Surface {
             AppNavHost() // Ce sera ton système de navigation global

@@ -78,7 +78,8 @@ class MatchmakingViewModel : ViewModel() {
                     mapOf(
                         "white" to opponent,
                         "black" to username,
-                        "createdAt" to FieldValue.serverTimestamp()
+                        "createdAt" to FieldValue.serverTimestamp(),
+                        "type" to type
                     )
                 ).await()
 

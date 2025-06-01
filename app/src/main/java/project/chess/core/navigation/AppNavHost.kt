@@ -1,6 +1,7 @@
 package project.chess.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,6 +12,7 @@ import project.chess.auth.ui.LoginScreen
 import project.chess.auth.ui.SignupScreen
 import project.chess.gamepkg.LocalGameScreen
 import project.chess.gamepkg.OnlineGameLoader
+import project.chess.menu.ui.FriendMatchScreen
 import project.chess.menu.ui.HistoryScreen
 import project.chess.menu.ui.HomeScreen
 import project.chess.menu.ui.MainMenuDestination
@@ -20,6 +22,7 @@ import project.chess.menu.ui.ProfileScreen
 import project.chess.menu.ui.RankingScreen
 import project.chess.menu.ui.SearchingMatchScreen
 import project.chess.menu.ui.SettingsScreen
+import project.chess.menu.viewmodel.FriendMatchViewModel
 import project.chess.menu.viewmodel.MatchmakingViewModel
 import project.chess.online.OnlineGameScreen
 
@@ -34,10 +37,26 @@ object OnlineRoutes {
     const val Searching = "searching"
 }
 
+object FriendRoutes{
+    const val FriendSearch = "friend_search"
+}
+
 
 @Composable
-fun AppNavHost(navController: NavHostController = rememberNavController()) {
+fun AppNavHost(
+    navController: NavHostController = rememberNavController(),
+            initialGameId: String? = null,
+    isChallenge: Boolean = false
+) {
     val matchmakingViewModel: MatchmakingViewModel = viewModel()
+
+    LaunchedEffect(initialGameId, isChallenge) {
+        if (isChallenge && initialGameId != null) {
+            navController.navigate("online_game/${initialGameId}/false")
+        }
+    }
+
+
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
         composable(Routes.LOGIN) {
@@ -108,7 +127,11 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
                 OnlineGameScreen(gameId = gameId, isWhite = isWhite)
             }
 
-
+            composable(FriendRoutes.FriendSearch) {
+                FriendMatchScreen(
+                    navController = navController
+                )
+            }
 
         }
 
