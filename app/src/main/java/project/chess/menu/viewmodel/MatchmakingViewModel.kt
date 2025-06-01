@@ -57,7 +57,6 @@ class MatchmakingViewModel : ViewModel() {
                         val match = snapshot?.documents?.firstOrNull { doc ->
                             val otherUsername = doc.getString("username")
                             val otherElo = doc.getLong("elo")?.toInt() ?: 1000
-
                             otherUsername != null &&
                                     otherUsername != username &&
                                     (type == "random" || kotlin.math.abs(otherElo - elo) < 150)

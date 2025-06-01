@@ -40,5 +40,5 @@
     <string name="newpass">New password</string>
     <string name="updatedpass">Password updated</string>
     <string name="your_ranking">Your rank : #%1$d - %2$s - ELO : %3$d</string>
-    <string name="match_found">Match found versus : #%1$d</string>
+    <string name="match_found">Match found versus : #%1$s</string>
 </resources>

@@ -27,7 +27,9 @@ import project.chess.entities.Roi
 import project.chess.entities.Tour
 
 @Composable
-fun LocalGameScreen(onGameEnd: () -> Unit = {}) {
+fun LocalGameScreen(
+    modifier: Modifier = Modifier,
+    onGameEnd: () -> Unit = {}) {
     val plateau = remember { Plateau() }
     var selectedCase by remember { mutableStateOf<Case?>(null) }
     var possibleMoves by remember { mutableStateOf<List<Case>>(emptyList()) }
