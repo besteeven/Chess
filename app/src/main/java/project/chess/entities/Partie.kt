@@ -4,9 +4,12 @@ import java.time.LocalDateTime
 
 data class Partie(
     val id: String,
+    val type: TypePartie,
+    val joueurBlanc: Joueur,
+    val joueurNoir: Joueur,
+    val joueurCourant: Joueur,
     val dateDebut: LocalDateTime,
     var dateFin: LocalDateTime? = null,
-    var tourActuel: Couleur,
     val historique: MutableList<Coup> = mutableListOf()
 ) {
     fun commencerPartie() {}

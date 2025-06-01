@@ -3,7 +3,9 @@ package project.chess.entities
 data class Case(
     val x: Int,
     val y: Int,
-    val couleur: Couleur, var piece: Piece? = null) {
+    val couleur: Couleur,
+    var piece: Piece?,
+    val plateau: Plateau) {
     fun estValide(): Boolean {
         return x in 0..7 && y in 0..7
     }
