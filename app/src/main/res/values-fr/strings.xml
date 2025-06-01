@@ -11,7 +11,7 @@
     <string name="playerName">Nom de joueur</string>"
     <string name="local_game">Locale</string>
     <string name="online_game">En ligne</string>
-    <string name="async_game">Partie /nasynchrone</string>
+    <string name="async_game">Async</string>
     <string name="friendly_game">Amicale</string>
     <string name="home">Accueil</string>
     <string name="history">Historique</string>
