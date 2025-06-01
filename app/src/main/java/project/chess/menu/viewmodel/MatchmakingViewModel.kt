@@ -10,13 +10,15 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.runtime.State
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import project.chess.menu.data.findOrCreateMatch
+import project.chess.menu.data.tryFindOrCreateMatch
 
 class MatchmakingViewModel : ViewModel() {
     private val db = Firebase.firestore
     private val auth = Firebase.auth
-    private val username = auth.currentUser?.displayName ?: auth.currentUser?.email ?: "unknown"
-
-    private var listener: ListenerRegistration? = null
 
     private val _isSearching = mutableStateOf(false)
     val isSearching: State<Boolean> = _isSearching
@@ -24,103 +26,72 @@ class MatchmakingViewModel : ViewModel() {
     private val _matchFound = MutableStateFlow<String?>(null)
     val matchFound: StateFlow<String?> = _matchFound
 
-    private var currentSearchId: String? = null
-
     private val _gameId = MutableStateFlow<String?>(null)
     val gameId: StateFlow<String?> = _gameId
 
-    fun resetMatchmakingState() {
-        _matchFound.value = null
-        _gameId.value = null
-    }
+    private val _isWhite = MutableStateFlow<Boolean?>(null)
+    val isWhite: StateFlow<Boolean?> = _isWhite
 
+    private var listener: ListenerRegistration? = null
 
     fun startSearch(type: String) {
         _isSearching.value = true
         _matchFound.value = null
+        _gameId.value = null
+        _isWhite.value = null
 
-        val email = auth.currentUser?.email ?: run {
-            _isSearching.value = false
-            return
-        }
+        val email = auth.currentUser?.email ?: return
 
-        // Étape 1 : Trouver le document user avec cet email
-        db.collection("users")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnSuccessListener { result ->
-                val userDoc = result.documents.firstOrNull()
-                if (userDoc == null) {
-                    _isSearching.value = false
-                    return@addOnSuccessListener
-                }
-
-                val username = userDoc.id
-                val elo = userDoc.getLong("elo")?.toInt() ?: 1000
-
-                // Étape 2 : écouter la file d’attente
-                listener = db.collection("matchmaking")
-                    .whereEqualTo("type", type)
-                    .orderBy("timestamp")
-                    .addSnapshotListener { snapshot, _ ->
-                        val match = snapshot?.documents?.firstOrNull { doc ->
-                            val otherUsername = doc.getString("username")
-                            val otherElo = doc.getLong("elo")?.toInt() ?: 1000
-                            otherUsername != null &&
-                                    otherUsername != username &&
-                                    (type == "random" || kotlin.math.abs(otherElo - elo) < 150)
-                        }
-
-                        if (match != null) {
-                            val opponentUsername = match.getString("username") ?: return@addSnapshotListener
-
-                            val gameDoc = db.collection("games").document()
-                            val newGameId = gameDoc.id
-
-                            gameDoc.set(
-                                mapOf(
-                                    "white" to username,
-                                    "black" to opponentUsername,
-                                    "createdAt" to FieldValue.serverTimestamp()
-                                )
-                            )
-
-                            db.collection("matchmaking").document(match.id).delete()
-                            currentSearchId?.let {
-                                db.collection("matchmaking").document(it).delete()
-                            }
-
-                            listener?.remove()
-                            _isSearching.value = false
-                            _matchFound.value = opponentUsername
-                            _gameId.value = newGameId
-                        }
-                    }
-
-                // Étape 3 : ajouter son entrée à la file
-                val doc = db.collection("matchmaking").document()
-                currentSearchId = doc.id
-                doc.set(
-                    mapOf(
-                        "type" to type,
-                        "username" to username,
-                        "elo" to elo,
-                        "timestamp" to FieldValue.serverTimestamp()
-                    )
-                )
-            }
-            .addOnFailureListener {
+        viewModelScope.launch {
+            val username = getUsernameByEmail(email) ?: run {
                 _isSearching.value = false
+                return@launch
+            }
+
+            val userDoc = db.collection("users").document(username).get().await()
+            val elo = userDoc.getLong("elo")?.toInt() ?: 1000
+
+            val result = tryFindOrCreateMatch(db, username, elo, type)
+
+            if (result.waiting) {
+                // Pas de match encore, attendre
+                listenForMatch(username)
+            } else {
+                // Match trouvé et créé
+                _gameId.value = result.gameId
+                _matchFound.value = result.opponent
+                _isWhite.value = result.isWhite
+                _isSearching.value = false
+            }
+        }
+    }
+
+    private fun listenForMatch(username: String) {
+        listener = db.collection("games")
+            .whereEqualTo("white", username)
+            .addSnapshotListener { snapshot, _ ->
+                val game = snapshot?.documents?.firstOrNull() ?: return@addSnapshotListener
+                val gameId = game.id
+                val opponent = game.getString("black") ?: return@addSnapshotListener
+
+                listener?.remove()
+
+                _isSearching.value = false
+                _gameId.value = gameId
+                _matchFound.value = opponent
+                _isWhite.value = true
             }
     }
 
-
-
     fun cancelSearch() {
         _isSearching.value = false
-        currentSearchId?.let {
-            db.collection("matchmaking").document(it).delete()
+        val email = auth.currentUser?.email ?: return
+
+        viewModelScope.launch {
+            val username = getUsernameByEmail(email) ?: return@launch
+            db.collection("matchmaking").document(username).delete().await()
         }
+
         listener?.remove()
     }
 
@@ -129,3 +100,15 @@ class MatchmakingViewModel : ViewModel() {
         cancelSearch()
     }
 }
+
+
+
+suspend fun getUsernameByEmail(email: String): String? {
+    val db = Firebase.firestore
+    val result = db.collection("users")
+        .whereEqualTo("email", email)
+        .get()
+        .await()
+    return result.documents.firstOrNull()?.id
+}
+

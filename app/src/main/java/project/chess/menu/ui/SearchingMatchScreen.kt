@@ -1,5 +1,6 @@
 package project.chess.menu.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,13 @@ fun SearchingMatchScreen(
     val isSearching by viewModel.isSearching
     val matchFound by viewModel.matchFound.collectAsState()
     val gameId by viewModel.gameId.collectAsState()
+    val isWhite by viewModel.isWhite.collectAsState()
+    Log.d("SearchingScreen", "GameId: $gameId, IsWhite: $isWhite")
+    LaunchedEffect(gameId, isWhite) {
+        if (gameId != null && isWhite != null) {
+            navController.navigate("online_game/${gameId}/${isWhite}")
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -43,7 +51,7 @@ fun SearchingMatchScreen(
     ) {
         if (isSearching) {
             CircularProgressIndicator()
-            Text(stringResource(R.string.lookforopponent))
+            Text("Recherche d'un adversaire...")
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -51,16 +59,11 @@ fun SearchingMatchScreen(
                 viewModel.cancelSearch()
                 navController.popBackStack()
             }) {
-                Text(stringResource(R.string.cancel))
+                Text("Annuler")
             }
         } else if (matchFound != null) {
-            if (gameId != null) {
-                LaunchedEffect(gameId) {
-                    navController.navigate("online_game/${gameId}")
-                    viewModel.resetMatchmakingState()
-                }
-            }
-
+            Text("Adversaire trouvé : ${matchFound}")
         }
     }
 }
+

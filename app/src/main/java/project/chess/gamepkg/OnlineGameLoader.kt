@@ -13,38 +13,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
 import project.chess.online.OnlineGameScreen
 
 @Composable
 fun OnlineGameLoader(gameId: String) {
-    val context = LocalContext.current
     val db = Firebase.firestore
-    val auth = Firebase.auth
-    val currentUsername = auth.currentUser?.displayName ?: auth.currentUser?.email ?: "unknown"
-
     var isWhite by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(gameId) {
-        db.collection("games").document(gameId).get()
-            .addOnSuccessListener { document ->
-                val white = document.getString("white")
-                val black = document.getString("black")
+        val currentUsername = getCurrentUsername()
+        val docSnapshot = db.collection("games").document(gameId).get().await()
+        val white = docSnapshot.getString("white")
+        val black = docSnapshot.getString("black")
 
-                isWhite = when (currentUsername) {
-                    white -> true
-                    black -> false
-                    else -> null
-                }
-            }
+        isWhite = when (currentUsername) {
+            white -> true
+            black -> false
+            else -> null // Cas d'erreur : ni blanc ni noir
+        }
     }
 
-    if (isWhite != null) {
-        OnlineGameScreen(gameId = gameId, isWhite = isWhite!!)
-    } else {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    when (isWhite) {
+        true, false -> OnlineGameScreen(gameId = gameId, isWhite = isWhite!!)
+        null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     }
 }
+
+suspend fun getCurrentUsername(): String? {
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+
+    val email = auth.currentUser?.email ?: return null
+
+    val result = db.collection("users")
+        .whereEqualTo("email", email)
+        .get()
+        .await()
+
+    return result.documents.firstOrNull()?.id
+}
+
+

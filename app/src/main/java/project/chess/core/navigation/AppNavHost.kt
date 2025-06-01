@@ -102,10 +102,13 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
                 })
             }
 
-            composable("online_game/{gameId}") { backStackEntry ->
+            composable("online_game/{gameId}/{isWhite}") { backStackEntry ->
                 val gameId = backStackEntry.arguments?.getString("gameId") ?: return@composable
-                OnlineGameLoader(gameId = gameId)
+                val isWhite = backStackEntry.arguments?.getString("isWhite")?.toBooleanStrictOrNull() ?: return@composable
+                OnlineGameScreen(gameId = gameId, isWhite = isWhite)
             }
+
+
 
         }
 
