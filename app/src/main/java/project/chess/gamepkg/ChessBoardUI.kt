@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.chess.entities.Piece
 import project.chess.entities.Case
+
 @Composable
 fun ChessBoardUI(
     board: Array<Array<Piece?>>,
@@ -59,7 +60,7 @@ fun ChessBoardUI(
                         ) {
                             val piece = board[y][x]
                             if (piece != null) {
-                                androidx.compose.material.Text(
+                                Text(
                                     text = piece.getSymbol(),
                                     fontSize = 24.sp
                                 )
