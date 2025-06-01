@@ -1,0 +1,98 @@
+package project.chess.core.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
+import project.chess.auth.ui.LoginScreen
+import project.chess.auth.ui.SignupScreen
+import project.chess.menu.ui.HistoryScreen
+import project.chess.menu.ui.HomeScreen
+import project.chess.menu.ui.MainMenuDestination
+import project.chess.menu.ui.MainMenuScreen
+import project.chess.menu.ui.MatchTypeSelectionScreen
+import project.chess.menu.ui.ProfileScreen
+import project.chess.menu.ui.RankingScreen
+import project.chess.menu.ui.SearchingMatchScreen
+import project.chess.menu.ui.SettingsScreen
+import project.chess.menu.viewmodel.MatchmakingViewModel
+
+object Routes {
+    const val LOGIN = "login"
+    const val SIGNUP = "signup"
+    const val MENU = "menu"
+}
+
+object OnlineRoutes {
+    const val MatchType = "match_type"
+    const val Searching = "searching"
+}
+
+
+@Composable
+fun AppNavHost(navController: NavHostController = rememberNavController()) {
+    val matchmakingViewModel: MatchmakingViewModel = viewModel()
+    NavHost(navController = navController, startDestination = Routes.LOGIN) {
+
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                onLoginSuccess = { navController.navigate(Routes.MENU) },
+                onSignupClick = { navController.navigate(Routes.SIGNUP) }
+            )
+        }
+        composable(Routes.SIGNUP) {
+            SignupScreen(
+                onSignupSuccess = { navController.navigate(Routes.MENU) },
+                onLoginClick = { navController.popBackStack() }
+            )
+        }
+
+        navigation(startDestination = MainMenuDestination.Home.route, route = Routes.MENU) {
+            composable(MainMenuDestination.Home.route) {
+                MainMenuScreen(
+                    navController = navController,
+                    content = { HomeScreen(navController = navController) }
+                )
+            }
+            composable(MainMenuDestination.History.route) {
+                MainMenuScreen(
+                    navController = navController,
+                    content = { HistoryScreen() }
+                )
+            }
+            composable(MainMenuDestination.Profile.route) {
+                MainMenuScreen(
+                    navController = navController,
+                    content = { ProfileScreen() }
+                )
+            }
+            composable(MainMenuDestination.Ranking.route) {
+                MainMenuScreen(
+                    navController = navController,
+                    content = { RankingScreen() }
+                )
+            }
+            composable(MainMenuDestination.Settings.route) {
+                MainMenuScreen(
+                    navController = navController,
+                    content = {
+                        SettingsScreen(
+                            navController = navController
+                        )
+                    }
+                )
+            }
+
+            composable(OnlineRoutes.MatchType) {
+                MatchTypeSelectionScreen(navController, matchmakingViewModel)
+            }
+            composable(OnlineRoutes.Searching) {
+                SearchingMatchScreen(navController, matchmakingViewModel)
+            }
+        }
+
+    }
+}

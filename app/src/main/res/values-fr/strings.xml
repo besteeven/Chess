@@ -5,7 +5,7 @@
     <string name="username">NOM D\'UTILISATEUR</string>"
     <string name="password">MOT DE PASSE</string>
     <string name="email">EMAIL</string>
-    <string name="language">Langue 🇫🇷</string>
+    <string name="language">Langue</string>
     <string name="logout">Se déconnecter</string>
     <string name="change_password">Changer le mot de passe</string>
     <string name="playerName">Nom de joueur</string>"
@@ -19,4 +19,27 @@
     <string name="ranking">Classement</string>
     <string name="settings">Paramètres</string>
     <string name="edit_profile">Modifier le profil</string>
+    <string name="french">Français</string>
+    <string name="english">English</string>
+    <string name="spanish">Español</string>
+    <string name="loading">Chargement...</string>
+    <string name="friends">Amis</string>
+    <string name="addfriends">Ajouter un ami</string>
+    <string name="friendrequests">Demandes d\'ami</string>
+    <string name="accept">Accepter</string>
+    <string name="refuse">Refuser</string>
+    <string name="pseudo">Pseudo</string>
+    <string name="send">Envoyer</string>
+    <string name="cancel">Annuler</string>
+    <string name="lookforopponent">Recherche d\'un adversaire</string>
+    <string name="gametype">Type de partie</string>
+    <string name="ranked">Partie classé</string>
+    <string name="unranked">Partie non classé</string>
+    <string name="random">Partie aléatoire</string>
+    <string name="oldpass">Ancien mot de pass</string>
+    <string name="newpass">New password</string>
+    <string name="updatedpass">Password updated</string>
+    <string name="your_ranking">Votre classement : #%1$d - %2$s - ELO : %3$d</string>
+    <string name="match_found">Match trouvé contre : #%1$d</string>
+
 </resources>
