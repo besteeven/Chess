@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ fun SearchingMatchScreen(
 ) {
     val isSearching by viewModel.isSearching
     val matchFound by viewModel.matchFound.collectAsState()
+    val gameId by viewModel.gameId.collectAsState()
 
     Column(
         modifier = Modifier
@@ -52,12 +54,13 @@ fun SearchingMatchScreen(
                 Text(stringResource(R.string.cancel))
             }
         } else if (matchFound != null) {
-            Text(
-                text = stringResource(
-                    id = R.string.match_found,
-                    matchFound ?: "Joueur inconnu"
-                )
-            )
+            if (gameId != null) {
+                LaunchedEffect(gameId) {
+                    navController.navigate("online_game/${gameId}")
+                    viewModel.resetMatchmakingState()
+                }
+            }
+
         }
     }
 }

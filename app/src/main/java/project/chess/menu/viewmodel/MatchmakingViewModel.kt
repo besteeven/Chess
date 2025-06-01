@@ -26,6 +26,15 @@ class MatchmakingViewModel : ViewModel() {
 
     private var currentSearchId: String? = null
 
+    private val _gameId = MutableStateFlow<String?>(null)
+    val gameId: StateFlow<String?> = _gameId
+
+    fun resetMatchmakingState() {
+        _matchFound.value = null
+        _gameId.value = null
+    }
+
+
     fun startSearch(type: String) {
         _isSearching.value = true
         _matchFound.value = null
@@ -63,13 +72,28 @@ class MatchmakingViewModel : ViewModel() {
                         }
 
                         if (match != null) {
+                            val opponentUsername = match.getString("username") ?: return@addSnapshotListener
+
+                            val gameDoc = db.collection("games").document()
+                            val newGameId = gameDoc.id
+
+                            gameDoc.set(
+                                mapOf(
+                                    "white" to username,
+                                    "black" to opponentUsername,
+                                    "createdAt" to FieldValue.serverTimestamp()
+                                )
+                            )
+
                             db.collection("matchmaking").document(match.id).delete()
                             currentSearchId?.let {
                                 db.collection("matchmaking").document(it).delete()
                             }
+
                             listener?.remove()
                             _isSearching.value = false
-                            _matchFound.value = match.getString("username")
+                            _matchFound.value = opponentUsername
+                            _gameId.value = newGameId
                         }
                     }
 

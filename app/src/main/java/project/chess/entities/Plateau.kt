@@ -119,6 +119,12 @@ class Plateau {
         }
         return false
     }
+    fun Plateau.getCase(notation: String): Case? {
+        if (notation.length != 2) return null
+        val x = notation[0].lowercaseChar() - 'a'
+        val y = 8 - (notation[1].digitToIntOrNull() ?: return null)
+        return if (x in 0..7 && y in 0..7) this.cases[y][x] else null
+    }
 
 
 }

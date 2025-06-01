@@ -10,6 +10,7 @@ import androidx.navigation.navigation
 import project.chess.auth.ui.LoginScreen
 import project.chess.auth.ui.SignupScreen
 import project.chess.gamepkg.LocalGameScreen
+import project.chess.gamepkg.OnlineGameLoader
 import project.chess.menu.ui.HistoryScreen
 import project.chess.menu.ui.HomeScreen
 import project.chess.menu.ui.MainMenuDestination
@@ -20,6 +21,7 @@ import project.chess.menu.ui.RankingScreen
 import project.chess.menu.ui.SearchingMatchScreen
 import project.chess.menu.ui.SettingsScreen
 import project.chess.menu.viewmodel.MatchmakingViewModel
+import project.chess.online.OnlineGameScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -99,6 +101,12 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
                     navController.popBackStack()
                 })
             }
+
+            composable("online_game/{gameId}") { backStackEntry ->
+                val gameId = backStackEntry.arguments?.getString("gameId") ?: return@composable
+                OnlineGameLoader(gameId = gameId)
+            }
+
         }
 
     }
