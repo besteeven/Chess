@@ -1,7 +1,8 @@
-
 package project.chess.online
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,13 +15,14 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.delay
 import project.chess.entities.Case
 import project.chess.entities.Couleur
 import project.chess.entities.Plateau
 import project.chess.gamepkg.ChessBoardUI
 
 @Composable
-fun OnlineGameScreen(gameId: String, isWhite: Boolean) {
+fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {}) {
     val db = Firebase.firestore
     val auth = Firebase.auth
     val context = LocalContext.current
@@ -33,6 +35,7 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean) {
     var endMessage by remember { mutableStateOf<String?>(null) }
     val myColor = if (isWhite) Couleur.BLANC else Couleur.NOIR
     var moveListener: ListenerRegistration? by remember { mutableStateOf(null) }
+    var showMenu by remember { mutableStateOf(false) }
 
     val userEmail = auth.currentUser?.email
     var username by remember { mutableStateOf("unknown") }
@@ -77,6 +80,19 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean) {
             }
     }
 
+    // Écoute le champ "result" pour la capitulation/adversaire
+    LaunchedEffect(gameId) {
+        db.collection("games").document(gameId)
+            .addSnapshotListener { snapshot, _ ->
+                val result = snapshot?.getString("result")
+                if (result == "white_win") {
+                    endMessage = if (isWhite) "Vous avez gagné ! L'adversaire a abandonné." else "Vous avez abandonné la partie."
+                } else if (result == "black_win") {
+                    endMessage = if (!isWhite) "Vous avez gagné ! L'adversaire a abandonné." else "Vous avez abandonné la partie."
+                }
+            }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             moveListener?.remove()
@@ -97,8 +113,41 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean) {
         currentTurnColor = if (myColor == Couleur.BLANC) Couleur.NOIR else Couleur.BLANC
     }
 
+    // Capitulation
+    fun resign() {
+        // Notifie Firestore de l'abandon
+        val result = if (isWhite) "black_win" else "white_win"
+        db.collection("games").document(gameId).update("result", result)
+    }
+
+    // Ferme automatiquement après 3 secondes si fin de partie
+    LaunchedEffect(endMessage) {
+        if (endMessage != null) {
+            delay(3000)
+            onGameEnd()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column {
+            // Menu capitulation
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                }
+                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Capituler") },
+                        onClick = {
+                            showMenu = false
+                            resign()
+                        }
+                    )
+                }
+            }
             Text(
                 text = "Tour : ${if (currentTurnColor == Couleur.BLANC) "Blanc" else "Noir"}",
                 fontSize = 20.sp,
@@ -137,11 +186,12 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean) {
             )
         }
 
+        // Dialog de fin de partie (capitulation ou victoire par abandon)
         if (endMessage != null) {
             AlertDialog(
                 onDismissRequest = {},
                 confirmButton = {
-                    Button(onClick = { /* Naviguer vers menu ou quitter */ }) {
+                    Button(onClick = { onGameEnd() }) {
                         Text("Quitter")
                     }
                 },
@@ -176,4 +226,3 @@ fun checkGameState(plateau: Plateau, couleur: Couleur, onEnd: (String) -> Unit) 
         plateau.roiEnEchec(couleur) -> {} // Message non bloquant
     }
 }
-
