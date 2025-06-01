@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import project.chess.auth.ui.LoginScreen
 import project.chess.auth.ui.SignupScreen
+import project.chess.gamepkg.LocalGameScreen
 import project.chess.menu.ui.HistoryScreen
 import project.chess.menu.ui.HomeScreen
 import project.chess.menu.ui.MainMenuDestination
@@ -91,6 +92,12 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
             }
             composable(OnlineRoutes.Searching) {
                 SearchingMatchScreen(navController, matchmakingViewModel)
+            }
+
+            composable("localGame") {
+                LocalGameScreen(onGameEnd = {
+                    navController.popBackStack()
+                })
             }
         }
 
