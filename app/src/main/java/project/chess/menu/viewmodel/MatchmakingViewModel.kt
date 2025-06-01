@@ -1,5 +1,6 @@
 package project.chess.menu.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import project.chess.menu.data.findOrCreateMatch
@@ -51,37 +53,80 @@ class MatchmakingViewModel : ViewModel() {
             val userDoc = db.collection("users").document(username).get().await()
             val elo = userDoc.getLong("elo")?.toInt() ?: 1000
 
-            val result = tryFindOrCreateMatch(db, username, elo, type)
+            val matchmakingRef = db.collection("matchmaking")
+            matchmakingRef.document(username).delete().await() // Clear any old search
 
-            if (result.waiting) {
-                // Pas de match encore, attendre
-                listenForMatch(username)
-            } else {
-                // Match trouvé et créé
-                _gameId.value = result.gameId
-                _matchFound.value = result.opponent
-                _isWhite.value = result.isWhite
+            // Cherche un autre joueur déjà en attente
+            val waitingPlayer = matchmakingRef
+                .orderBy("timestamp")
+                .get()
+                .await()
+                .documents
+                .firstOrNull { doc ->
+                    val otherUsername = doc.getString("username")
+                    val otherElo = doc.getLong("elo")?.toInt() ?: 1000
+                    otherUsername != null &&
+                            doc.id != username &&
+                            (type == "random" || kotlin.math.abs(otherElo - elo) < 150)
+                }
+
+            if (waitingPlayer != null) {
+                val opponent = waitingPlayer.getString("username") ?: return@launch
+
+                val gameDoc = db.collection("games").document()
+                gameDoc.set(
+                    mapOf(
+                        "white" to opponent,
+                        "black" to username,
+                        "createdAt" to FieldValue.serverTimestamp()
+                    )
+                ).await()
+
+                matchmakingRef.document(waitingPlayer.id).delete().await()
+
                 _isSearching.value = false
+                _matchFound.value = opponent
+                _gameId.value = gameDoc.id
+                _isWhite.value = false
+
+            } else {
+                // Tu es en attente
+                matchmakingRef.document(username).set(
+                    mapOf(
+                        "username" to username,
+                        "elo" to elo,
+                        "type" to type,
+                        "timestamp" to FieldValue.serverTimestamp()
+                    )
+                ).await()
+
+                // 🔁 Poll toutes les 2 secondes pour voir si une partie t'a été assignée
+                while (true) {
+                    delay(2000)
+
+                    val possibleGame = db.collection("games")
+                        .whereEqualTo("white", username)
+                        .get()
+                        .await()
+                        .documents
+                        .firstOrNull()
+
+                    if (possibleGame != null) {
+                        val opponent = possibleGame.getString("black") ?: continue
+                        _matchFound.value = opponent
+                        _gameId.value = possibleGame.id
+                        _isWhite.value = true
+                        _isSearching.value = false
+
+                        // Supprime ton entrée matchmaking
+                        db.collection("matchmaking").document(username).delete()
+                        break
+                    }
+                }
             }
         }
     }
 
-    private fun listenForMatch(username: String) {
-        listener = db.collection("games")
-            .whereEqualTo("white", username)
-            .addSnapshotListener { snapshot, _ ->
-                val game = snapshot?.documents?.firstOrNull() ?: return@addSnapshotListener
-                val gameId = game.id
-                val opponent = game.getString("black") ?: return@addSnapshotListener
-
-                listener?.remove()
-
-                _isSearching.value = false
-                _gameId.value = gameId
-                _matchFound.value = opponent
-                _isWhite.value = true
-            }
-    }
 
     fun cancelSearch() {
         _isSearching.value = false
@@ -100,8 +145,6 @@ class MatchmakingViewModel : ViewModel() {
         cancelSearch()
     }
 }
-
-
 
 suspend fun getUsernameByEmail(email: String): String? {
     val db = Firebase.firestore
