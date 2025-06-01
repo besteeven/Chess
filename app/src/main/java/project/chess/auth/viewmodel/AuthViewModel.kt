@@ -63,17 +63,35 @@ class AuthViewModel : ViewModel(), IAuthViewModel {
             return
         }
 
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
-                val userMap = mapOf("email" to email)
-                db.collection("users").document(username).set(userMap)
-                    .addOnSuccessListener { onSuccess() }
-                    .addOnFailureListener { _loginError.value = "Erreur lors de l’enregistrement du username" }
+        db.collection("users").document(username).get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    _loginError.value = "Nom d'utilisateur déjà utilisé"
+                } else {
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnSuccessListener {
+                            val userMap = mapOf(
+                                "email" to email,
+                                "elo" to 1200,
+                                "friends" to emptyList<String>(),
+                                "friendRequests" to emptyList<String>()
+                            )
+                            db.collection("users").document(username).set(userMap)
+                                .addOnSuccessListener { onSuccess() }
+                                .addOnFailureListener {
+                                    _loginError.value = "Erreur lors de l’enregistrement"
+                                }
+                        }
+                        .addOnFailureListener {
+                            _loginError.value = "Erreur lors de la création du compte"
+                        }
+                }
             }
             .addOnFailureListener {
-                _loginError.value = "Erreur lors de la création du compte"
+                _loginError.value = "Erreur de connexion"
             }
     }
+
 
 
     private fun signInWithEmail(email: String, password: String, onSuccess: () -> Unit) {

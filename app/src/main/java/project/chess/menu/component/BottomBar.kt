@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun BottomBar(
@@ -52,11 +53,11 @@ fun BottomBar(
                         }
                     },
                     icon = {
-                        Icon(item.icon, contentDescription = item.label)
+                        Icon(item.icon, contentDescription = "item.label")
 
                     },
                     label = {
-                        Text(text = item.label)
+                        Text(text = stringResource(id = item.labelRes))
                     }
                 )
             }

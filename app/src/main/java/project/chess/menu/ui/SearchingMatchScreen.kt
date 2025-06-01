@@ -1,0 +1,63 @@
+package project.chess.menu.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import project.chess.menu.viewmodel.MatchmakingViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import project.chess.R
+
+@Composable
+fun SearchingMatchScreen(
+    navController: NavController,
+    viewModel: MatchmakingViewModel = viewModel()
+) {
+    val isSearching by viewModel.isSearching
+    val matchFound by viewModel.matchFound.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (isSearching) {
+            CircularProgressIndicator()
+            Text(stringResource(R.string.lookforopponent))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = {
+                viewModel.cancelSearch()
+                navController.popBackStack()
+            }) {
+                Text(stringResource(R.string.cancel))
+            }
+        } else if (matchFound != null) {
+            Text(
+                text = stringResource(
+                    id = R.string.match_found,
+                    matchFound ?: "Joueur inconnu"
+                )
+            )
+        }
+    }
+}

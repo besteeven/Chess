@@ -1,6 +1,8 @@
 package project.chess.menu.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
@@ -18,11 +20,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import project.chess.core.theme.Theme
 import project.chess.menu.component.BottomBar
+import project.chess.R
+
 
 object MainMenuDestinations {
     val items = listOf(
@@ -34,11 +41,12 @@ object MainMenuDestinations {
     )
 }
 
-@Preview
 @Composable
-fun MainMenuScreen() {
+fun MainMenuScreen(
+    navController: NavHostController = rememberNavController(),
+    content: @Composable () -> Unit
+) {
     Theme {
-        val navController = rememberNavController()
         val currentBackStack by navController.currentBackStackEntryAsState()
         val currentRoute = currentBackStack?.destination?.route
 
@@ -51,30 +59,11 @@ fun MainMenuScreen() {
                 )
             }
         ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = MainMenuDestination.Home.route,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable(MainMenuDestination.Home.route) {
-                    HomeScreen()
-                }
-                composable(MainMenuDestination.History.route) {
-                    HistoryScreen()
-                }
-                composable(MainMenuDestination.Profile.route) {
-                    ProfileScreen()
-                }
-                composable(MainMenuDestination.Ranking.route) {
-                    RankingScreen()
-                }
-                composable(MainMenuDestination.Settings.route) {
-                    SettingsScreen()
-                }
+            Box(modifier = Modifier.padding(innerPadding)) {
+                content()
             }
         }
 
-        // 🔐 Bloquer le retour
         BackHandler(enabled = true) {
             // Ne fait rien
         }
@@ -82,10 +71,10 @@ fun MainMenuScreen() {
 }
 
 
-sealed class MainMenuDestination(val route: String, val icon: ImageVector, val label: String) {
-    object Home : MainMenuDestination("home", Icons.Default.Home, "Accueil")
-    object History : MainMenuDestination("history", Icons.Default.History, "Historique")
-    object Profile : MainMenuDestination("profile", Icons.Default.Person, "Profil")
-    object Ranking : MainMenuDestination("Ranking", Icons.Default.Star, "Classement")
-    object Settings : MainMenuDestination("settings", Icons.Default.Settings, "Paramètres")
+sealed class MainMenuDestination(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
+    object Home : MainMenuDestination("home", Icons.Default.Home, R.string.home)
+    object History : MainMenuDestination("history", Icons.Default.History, R.string.history)
+    object Profile : MainMenuDestination("profile", Icons.Default.Person, R.string.profile)
+    object Ranking : MainMenuDestination("Ranking", Icons.Default.Star, R.string.ranking)
+    object Settings : MainMenuDestination("settings", Icons.Default.Settings, R.string.settings)
 }
