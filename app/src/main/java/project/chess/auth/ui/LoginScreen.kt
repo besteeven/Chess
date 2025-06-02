@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -77,6 +79,8 @@ fun LoginScreen(
     var passwordError by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -92,21 +96,19 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 400.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Container noir transparent
+            Spacer(modifier = Modifier.height(300.dp)) // Pour descendre sous le logo
+
             Card(
-                modifier = Modifier
-                    .heightIn(max = 250.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.5f))
             ) {
-                Column(modifier = Modifier
-                    .padding(24.dp)
-                    .padding(horizontal = 15.dp)
-                    .fillMaxSize(),
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     CustomTextField(
@@ -128,7 +130,7 @@ fun LoginScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     CustomTextField(
                         value = password,
@@ -160,7 +162,8 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
             AuthButton(
                 text = stringResource(R.string.login),
                 onClick = {
@@ -170,7 +173,7 @@ fun LoginScreen(
                         valid = false
                     }
                     if (password.length < 6) {
-                        passwordError = "PASSWORD ERROR"//stringResource(R.string.error_password_short)
+                        passwordError = "PASSWORD ERROR"
                         valid = false
                     }
 
@@ -189,7 +192,7 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = stringResource(R.string.signup),
@@ -200,9 +203,12 @@ fun LoginScreen(
                 ),
                 modifier = Modifier.clickable(onClick = onSignupClick)
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
 
 
 @Preview(showBackground = true)

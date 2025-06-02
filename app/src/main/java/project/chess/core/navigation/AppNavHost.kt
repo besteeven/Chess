@@ -25,6 +25,7 @@ import project.chess.menu.ui.SettingsScreen
 import project.chess.menu.viewmodel.FriendMatchViewModel
 import project.chess.menu.viewmodel.MatchmakingViewModel
 import project.chess.online.OnlineGameScreen
+import project.chess.online.createOnEndHandler
 
 object Routes {
     const val LOGIN = "login"
@@ -124,7 +125,7 @@ fun AppNavHost(
             composable("online_game/{gameId}/{isWhite}") { backStackEntry ->
                 val gameId = backStackEntry.arguments?.getString("gameId") ?: return@composable
                 val isWhite = backStackEntry.arguments?.getString("isWhite")?.toBooleanStrictOrNull() ?: return@composable
-                OnlineGameScreen(gameId = gameId, isWhite = isWhite)
+                OnlineGameScreen(gameId = gameId, isWhite = isWhite, onGameEnd = createOnEndHandler(gameId, navController))
             }
 
             composable(FriendRoutes.FriendSearch) {

@@ -10,16 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.delay
+import project.chess.core.navigation.Routes
 import project.chess.entities.Case
 import project.chess.entities.Couleur
 import project.chess.entities.Plateau
 import project.chess.gamepkg.ChessBoardUI
+import project.chess.gamepkg.component.PlayerInfoCard
 
 @Composable
 fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {}) {
@@ -40,7 +43,6 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
     val userEmail = auth.currentUser?.email
     var username by remember { mutableStateOf("unknown") }
 
-    // Récupère le username à partir de l'email
     LaunchedEffect(userEmail) {
         if (userEmail != null) {
             db.collection("users")
@@ -54,7 +56,6 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
         }
     }
 
-    // Reçoit les coups de l’adversaire
     LaunchedEffect(gameId) {
         moveListener = db.collection("games")
             .document(gameId)
@@ -80,7 +81,6 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
             }
     }
 
-    // Écoute le champ "result" pour la capitulation/adversaire
     LaunchedEffect(gameId) {
         db.collection("games").document(gameId)
             .addSnapshotListener { snapshot, _ ->
@@ -94,9 +94,7 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
     }
 
     DisposableEffect(Unit) {
-        onDispose {
-            moveListener?.remove()
-        }
+        onDispose { moveListener?.remove() }
     }
 
     fun sendMove(from: String, to: String) {
@@ -113,14 +111,11 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
         currentTurnColor = if (myColor == Couleur.BLANC) Couleur.NOIR else Couleur.BLANC
     }
 
-    // Capitulation
     fun resign() {
-        // Notifie Firestore de l'abandon
         val result = if (isWhite) "black_win" else "white_win"
         db.collection("games").document(gameId).update("result", result)
     }
 
-    // Ferme automatiquement après 3 secondes si fin de partie
     LaunchedEffect(endMessage) {
         if (endMessage != null) {
             delay(3000)
@@ -128,17 +123,29 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column {
-            // Menu capitulation
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+        ) {
+            // Menu
             Row(
-                Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = { showMenu = true }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "Menu")
                 }
-                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
                     DropdownMenuItem(
                         text = { Text("Capituler") },
                         onClick = {
@@ -148,45 +155,63 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
                     )
                 }
             }
-            Text(
-                text = "Tour : ${if (currentTurnColor == Couleur.BLANC) "Blanc" else "Noir"}",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(8.dp)
-            )
-            ChessBoardUI(
-                board = board.value,
-                selectedCase = selectedCase,
-                possibleMoves = possibleMoves,
-                onCaseClick = { x, y ->
-                    if (currentTurnColor != myColor || endMessage != null) return@ChessBoardUI
-                    val case = plateau.cases[y][x] ?: return@ChessBoardUI
-                    val piece = case.piece
 
-                    if (selectedCase == null) {
-                        if (piece != null && piece.couleur == myColor) {
-                            selectedCase = case
-                            possibleMoves = piece.getMouvementsValides()
-                        }
-                    } else {
-                        if (case in possibleMoves) {
-                            val from = selectedCase!!.toString()
-                            val to = case.toString()
-                            plateau.applyMove(from, to)
-                            sendMove(from, to)
-                            selectedCase = null
-                            possibleMoves = emptyList()
-                            board.value = plateau.getBoardMatrix()
-                            checkGameState(plateau, myColor) { endMessage = it }
+            // Adversaire (haut)
+            PlayerInfoCard(
+                name = "Adversaire",
+                elo = "???",
+                isTurn = currentTurnColor != myColor,
+                color = if (isWhite) "NOIR" else "BLANC"
+            )
+
+            // Plateau
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+            ) {
+                ChessBoardUI(
+                    board = board.value,
+                    selectedCase = selectedCase,
+                    possibleMoves = possibleMoves,
+                    onCaseClick = { x, y ->
+                        if (currentTurnColor != myColor || endMessage != null) return@ChessBoardUI
+                        val case = plateau.cases[y][x] ?: return@ChessBoardUI
+                        val piece = case.piece
+
+                        if (selectedCase == null) {
+                            if (piece != null && piece.couleur == myColor) {
+                                selectedCase = case
+                                possibleMoves = piece.getMouvementsValides()
+                            }
                         } else {
-                            selectedCase = null
-                            possibleMoves = emptyList()
+                            if (case in possibleMoves) {
+                                val from = selectedCase!!.toString()
+                                val to = case.toString()
+                                plateau.applyMove(from, to)
+                                sendMove(from, to)
+                                selectedCase = null
+                                possibleMoves = emptyList()
+                                board.value = plateau.getBoardMatrix()
+                                checkGameState(plateau, myColor) { endMessage = it }
+                            } else {
+                                selectedCase = null
+                                possibleMoves = emptyList()
+                            }
                         }
                     }
-                }
+                )
+            }
+
+            // Joueur (bas)
+            PlayerInfoCard(
+                name = username,
+                elo = "???",
+                isTurn = currentTurnColor == myColor,
+                color = if (isWhite) "BLANC" else "NOIR"
             )
         }
 
-        // Dialog de fin de partie (capitulation ou victoire par abandon)
         if (endMessage != null) {
             AlertDialog(
                 onDismissRequest = {},
@@ -201,6 +226,7 @@ fun OnlineGameScreen(gameId: String, isWhite: Boolean, onGameEnd: () -> Unit = {
         }
     }
 }
+
 
 fun Plateau.getCase(notation: String): Case? {
     val file = notation[0] - 'a'
@@ -226,3 +252,65 @@ fun checkGameState(plateau: Plateau, couleur: Couleur, onEnd: (String) -> Unit) 
         plateau.roiEnEchec(couleur) -> {} // Message non bloquant
     }
 }
+
+fun createOnEndHandler(gameId: String, navController: NavController): () -> Unit {
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+
+    return let@{
+        val currentUser = auth.currentUser
+        if (currentUser == null) return@let
+
+        val gameRef = db.collection("games").document(gameId)
+
+        gameRef.get().addOnSuccessListener { gameDoc ->
+            if (!gameDoc.exists()) return@addOnSuccessListener
+
+            val white = gameDoc.getString("white") ?: return@addOnSuccessListener
+            val black = gameDoc.getString("black") ?: return@addOnSuccessListener
+            val result = gameDoc.getString("result") ?: return@addOnSuccessListener
+            val type = gameDoc.getString("type") ?: "unknown"
+            val timestamp = gameDoc.getTimestamp("createdAt")
+
+            val whiteWon = result == "white_win"
+            val blackWon = result == "black_win"
+
+            val whiteHistory = mapOf(
+                "opponent" to black,
+                "color" to "white",
+                "result" to if (whiteWon) "win" else "loss",
+                "type" to type,
+                "timestamp" to timestamp
+            )
+
+            val blackHistory = mapOf(
+                "opponent" to white,
+                "color" to "black",
+                "result" to if (blackWon) "win" else "loss",
+                "type" to type,
+                "timestamp" to timestamp
+            )
+
+            // Ajoute aux historiques
+            db.collection("users").document(white).collection("historic").add(whiteHistory)
+            db.collection("users").document(black).collection("historic").add(blackHistory)
+
+            // Supprime les coups + la partie
+            gameRef.collection("moves").get().addOnSuccessListener { movesSnapshot ->
+                val batch = db.batch()
+                movesSnapshot.documents.forEach { moveDoc ->
+                    batch.delete(moveDoc.reference)
+                }
+                batch.delete(gameRef)
+
+                batch.commit().addOnSuccessListener {
+                    navController.navigate(Routes.MENU) {
+                        popUpTo(0) { inclusive = true } // Nettoie le back stack
+                    }
+                }
+            }
+        }
+    }
+}
+
+

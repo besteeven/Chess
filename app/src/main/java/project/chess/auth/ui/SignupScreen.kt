@@ -3,8 +3,10 @@ package project.chess.auth.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -47,8 +49,9 @@ fun SignupScreen(
     var usernameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
+    val scrollState = rememberScrollState()
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Fond
         Image(
             painter = background,
             contentDescription = null,
@@ -59,23 +62,17 @@ fun SignupScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 400.dp),
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Bloc de formulaire
+            Spacer(modifier = Modifier.height(300.dp))
+
             Card(
-                modifier = Modifier
-                    .heightIn(max = 300.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.5f))
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .padding(horizontal = 15.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
-                ) {
+                Column(modifier = Modifier.padding(24.dp)) {
                     CustomTextField(
                         value = email,
                         onValueChange = {
@@ -86,13 +83,8 @@ fun SignupScreen(
                         isError = emailError != null,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (emailError != null) {
-                        Text(
-                            text = emailError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = typography.bodySmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                    emailError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, style = typography.bodySmall)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -107,13 +99,8 @@ fun SignupScreen(
                         isError = usernameError != null,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    if (usernameError != null) {
-                        Text(
-                            text = usernameError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = typography.bodySmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                    usernameError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, style = typography.bodySmall)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -136,34 +123,26 @@ fun SignupScreen(
                             }
                         }
                     )
-                    if (passwordError != null) {
-                        Text(
-                            text = passwordError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = typography.bodySmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                    passwordError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, style = typography.bodySmall)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             AuthButton(
                 text = stringResource(R.string.signup),
                 onClick = {
                     var valid = true
                     if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        emailError = "Email invalide"
-                        valid = false
+                        emailError = "Email invalide"; valid = false
                     }
                     if (username.length < 4) {
-                        usernameError = "Nom d'utilisateur trop court"
-                        valid = false
+                        usernameError = "Nom d'utilisateur trop court"; valid = false
                     }
                     if (password.length < 6) {
-                        passwordError = "Mot de passe trop court"
-                        valid = false
+                        passwordError = "Mot de passe trop court"; valid = false
                     }
 
                     if (valid) {
@@ -172,13 +151,8 @@ fun SignupScreen(
                 }
             )
 
-            if (error != null) {
-                Text(
-                    text = error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = typography.bodySmall,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+            error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = typography.bodySmall)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -187,14 +161,15 @@ fun SignupScreen(
                 text = stringResource(R.string.login),
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onTertiary,
-                style = typography.bodyLarge.copy(
-                    textDecoration = TextDecoration.Underline
-                ),
+                style = typography.bodyLarge.copy(textDecoration = TextDecoration.Underline),
                 modifier = Modifier.clickable(onClick = onLoginClick)
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
 
 
 @Preview(showBackground = true)
