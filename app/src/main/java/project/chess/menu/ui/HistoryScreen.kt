@@ -40,11 +40,13 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
 
     val totalMatches = matches.size
     val wins = matches.count { (you, result, _) ->
-        (result == "white_win" && you == "white") ||
-                (result == "black_win" && you == "black")
+        (result == "win")
     }
 
-    val winRate = if (totalMatches > 0) (wins * 100 / totalMatches) else 0
+    val winRate = if (totalMatches > 0)
+        (wins * 100 / totalMatches)
+    else 0
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -70,9 +72,8 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
                 itemsIndexed(matches) { _, match ->
                     val (you, result, opponent) = match
 
-                    val didWin = (result == "white_win" && you == "white") ||
-                            (result == "black_win" && you == "black")
-                    val status = if (didWin) "Victoire" else "Défaite"
+                    val didWin = (result == "win")
+                    val status = if (didWin) stringResource(R.string.victory) else stringResource(R.string.lose)
 
                     Row(
                         modifier = Modifier
@@ -90,11 +91,11 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             Text(
-                text = "Matchs joués : $totalMatches",
+                text = stringResource(R.string.matchplayed, totalMatches),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Taux de victoire : $winRate%",
+                text = stringResource(R.string.winrate, winRate),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
         }

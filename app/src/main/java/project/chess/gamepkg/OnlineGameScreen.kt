@@ -272,43 +272,46 @@ fun createOnEndHandler(gameId: String, navController: NavController): () -> Unit
             val type = gameDoc.getString("type") ?: "unknown"
             val timestamp = gameDoc.getTimestamp("createdAt")
 
-            val whiteWon = result == "white_win"
-            val blackWon = result == "black_win"
+            val currentUsername = currentUser.email ?: return@addOnSuccessListener
 
-            val whiteHistory = mapOf(
-                "opponent" to black,
-                "color" to "white",
-                "result" to if (whiteWon) "win" else "loss",
-                "type" to type,
-                "timestamp" to timestamp
-            )
+            // Cherche le nom d'utilisateur à partir de l'email
+            db.collection("users")
+                .whereEqualTo("email", currentUsername)
+                .get()
+                .addOnSuccessListener { userSnapshot ->
+                    val userDoc = userSnapshot.documents.firstOrNull() ?: return@addOnSuccessListener
+                    val username = userDoc.id
 
-            val blackHistory = mapOf(
-                "opponent" to white,
-                "color" to "black",
-                "result" to if (blackWon) "win" else "loss",
-                "type" to type,
-                "timestamp" to timestamp
-            )
+                    val isWhite = username == white
+                    val opponent = if (isWhite) black else white
+                    val color = if (isWhite) "white" else "black"
+                    val win = (result == "white_win" && isWhite) || (result == "black_win" && !isWhite)
 
-            // Ajoute aux historiques
-            db.collection("users").document(white).collection("historic").add(whiteHistory)
-            db.collection("users").document(black).collection("historic").add(blackHistory)
+                    val history = mapOf(
+                        "opponent" to opponent,
+                        "color" to color,
+                        "result" to if (win) "win" else "loss",
+                        "type" to type,
+                        "timestamp" to timestamp
+                    )
 
-            // Supprime les coups + la partie
-            gameRef.collection("moves").get().addOnSuccessListener { movesSnapshot ->
-                val batch = db.batch()
-                movesSnapshot.documents.forEach { moveDoc ->
-                    batch.delete(moveDoc.reference)
-                }
-                batch.delete(gameRef)
+                    db.collection("users").document(username).collection("historic").add(history)
 
-                batch.commit().addOnSuccessListener {
-                    navController.navigate(Routes.MENU) {
-                        popUpTo(0) { inclusive = true } // Nettoie le back stack
+                    // Supprime les coups + la partie
+                    gameRef.collection("moves").get().addOnSuccessListener { movesSnapshot ->
+                        val batch = db.batch()
+                        movesSnapshot.documents.forEach { moveDoc ->
+                            batch.delete(moveDoc.reference)
+                        }
+                        batch.delete(gameRef)
+
+                        batch.commit().addOnSuccessListener {
+                            navController.navigate(Routes.MENU) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     }
                 }
-            }
         }
     }
 }

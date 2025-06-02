@@ -43,5 +43,9 @@
     <string name="match_found">Match trouvé contre : #%1$s</string>
     <string name="searchMatch">Recherche de matches</string>
     <string name="foundOpponent">Match trouvé</string>
+    <string name="victory">Victoire</string>
+    <string name="lose">Défaite</string>
+    <string name="matchplayed">Parties jouées : %1$d</string>
+    <string name="winrate">Taux de victoire : %1$d%</string>
 
 </resources>
