@@ -45,6 +45,6 @@
     <string name="foundOpponent">Match found</string>
     <string name="victory">Win</string>
     <string name="lose">Lose</string>
-    <string name="matchplayed">Matchs played : %1$d</string>
-    <string name="winrate">"Winrate : %1$d%"</string>
+    <string name="winrate">Winrate : %1$s %%</string>
+    <string name="matchplayed">Matchs played : %1$s</string>
 </resources>

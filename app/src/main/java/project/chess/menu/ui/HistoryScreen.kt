@@ -91,11 +91,11 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             Text(
-                text = stringResource(R.string.matchplayed, totalMatches),
+                text = stringResource(R.string.matchplayed, totalMatches.toString()),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = stringResource(R.string.winrate, winRate),
+                text = stringResource(R.string.winrate, winRate.toString()),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
